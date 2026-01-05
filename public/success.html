@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento Confirmado - DressMe</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes checkmark {
+      0% { stroke-dashoffset: 100; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .checkmark-circle {
+      animation: checkmark 0.6s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-2xl w-full bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <img src="/logo-dressme.svg" alt="DressMe" class="h-16 mx-auto mb-6">
+    </div>
+
+    <!-- Success Icon -->
+    <div class="flex justify-center mb-8">
+      <div class="relative">
+        <svg class="w-24 h-24" viewBox="0 0 100 100">
+          <circle 
+            cx="50" 
+            cy="50" 
+            r="45" 
+            fill="none" 
+            stroke="#10b981" 
+            stroke-width="4"
+            class="checkmark-circle"
+            style="stroke-dasharray: 283; stroke-dashoffset: 283;"
+          />
+          <path 
+            d="M30 50 L45 65 L70 35" 
+            fill="none" 
+            stroke="#10b981" 
+            stroke-width="4" 
+            stroke-linecap="round"
+            class="checkmark-circle"
+            style="stroke-dasharray: 100; stroke-dashoffset: 100;"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-slate-900 mb-4">
+        🎉 Pagamento Confirmado!
+      </h1>
+      <p class="text-xl text-slate-600 mb-6">
+        Obrigado pela sua compra do DressMe!
+      </p>
+    </div>
+
+    <!-- Order Details -->
+    <div id="order-details" class="bg-slate-50 rounded-2xl p-6 mb-8">
+      <h2 class="font-bold text-lg mb-4 text-slate-900">Detalhes do Pedido:</h2>
+      <div class="space-y-3 text-slate-700">
+        <div class="flex justify-between">
+          <span>ID da Sessão:</span>
+          <span id="session-id" class="font-mono text-sm">Carregando...</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Status:</span>
+          <span id="payment-status" class="font-bold text-green-600">Carregando...</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Valor Total:</span>
+          <span id="amount-total" class="font-bold">Carregando...</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Email:</span>
+          <span id="customer-email">Carregando...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Steps -->
+    <div class="bg-blue-50 rounded-2xl p-6 mb-8 border-2 border-blue-200">
+      <h2 class="font-bold text-lg mb-4 text-blue-900">Próximos Passos:</h2>
+      <ol class="list-decimal list-inside space-y-2 text-blue-800">
+        <li>Você receberá um email de confirmação em breve</li>
+        <li>Nossa equipe entrará em contato para configuração da API do Google</li>
+        <li>O sistema ficará pronto em até 48 horas úteis</li>
+        <li>Você terá 10 anos de suporte incluído</li>
+      </ol>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4">
+      <a 
+        href="/"
+        class="flex-1 bg-blue-600 text-white text-center py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors"
+      >
+        Voltar ao Início
+      </a>
+      <a 
+        href="https://wa.me/351938754488"
+        target="_blank"
+        class="flex-1 bg-green-500 text-white text-center py-4 rounded-xl font-bold hover:bg-green-600 transition-colors"
+      >
+        Falar no WhatsApp
+      </a>
+    </div>
+
+    <!-- Support Info -->
+    <div class="mt-8 text-center text-sm text-slate-500">
+      <p>Precisa de ajuda? Entre em contato:</p>
+      <p class="font-bold text-slate-700 mt-1">suporte@tgoo.com.br</p>
+    </div>
+  </div>
+
+  <script>
+    // Obtém o session_id da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+
+    if (sessionId) {
+      // Exibe o session_id
+      document.getElementById('session-id').textContent = sessionId;
+
+      // Busca os detalhes da sessão
+      fetch(`/api/get-session-status.php?session_id=${sessionId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const session = data.session;
+            
+            // Atualiza os detalhes na página
+            document.getElementById('payment-status').textContent = 
+              session.payment_status === 'paid' ? 'PAGO ✓' : session.payment_status;
+            
+            document.getElementById('amount-total').textContent = 
+              `€${(session.amount_total / 100).toFixed(2)}`;
+            
+            document.getElementById('customer-email').textContent = 
+              session.customer_email || 'N/A';
+
+            // Salva no localStorage para histórico
+            localStorage.setItem('last-purchase', JSON.stringify({
+              sessionId: sessionId,
+              date: new Date().toISOString(),
+              amount: session.amount_total,
+              status: session.payment_status,
+            }));
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao buscar status:', error);
+          document.getElementById('payment-status').textContent = 'Erro ao carregar';
+        });
+    } else {
+      document.getElementById('session-id').textContent = 'Não encontrado';
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,218 @@
+================================================================================
+  INSTRUCOES DE INSTALACAO - DRESSME PRODUCTION
+================================================================================
+
+IMPORTANTE: Leia estas instrucoes antes de fazer o deploy!
+
+================================================================================
+1. ESTRUTURA DESTE ARQUIVO
+================================================================================
+
+Este ZIP contem TUDO necessario para o projeto funcionar em producao:
+
+├── index.html              (pagina principal)
+├── assets/                 (JS e CSS compilados)
+│   ├── index-[hash].js    (TODO codigo React + Stripe)
+│   └── index-[hash].css
+├── public/                 (paginas estaticas)
+│   ├── success.html
+│   └── cancel.html
+└── api/                    (backend PHP)
+    ├── composer.json
+    ├── config.php
+    ├── create-checkout-session.php
+    └── get-session-status.php
+
+================================================================================
+2. ONDE EXTRAIR NO SERVIDOR
+================================================================================
+
+Extraia TODO o conteudo deste ZIP na RAIZ PUBLICA do seu servidor:
+
+- cPanel/Plesk: public_html/
+- Apache: /var/www/html/
+- Nginx: /usr/share/nginx/html/
+
+IMPORTANTE: Extraia o conteudo DIRETO na pasta, NAO crie subpastas!
+
+Correto:
+  public_html/index.html
+  public_html/assets/
+  public_html/api/
+  public_html/public/
+
+Errado:
+  public_html/deploy-producao/index.html  ← NAO FACA ISSO!
+
+================================================================================
+3. CONFIGURAR O BACKEND (OBRIGATORIO!)
+================================================================================
+
+Apos extrair os arquivos:
+
+A) VIA SSH (Recomendado):
+   
+   1. Conecte ao servidor:
+      ssh usuario@seuservidor.com
+   
+   2. Navegue ate a pasta API:
+      cd /var/www/html/api
+      (ou cd ~/public_html/api)
+   
+   3. Instale as dependencias:
+      composer install --no-dev --optimize-autoloader
+   
+   4. Crie o arquivo .env:
+      nano .env
+   
+   5. Cole este conteudo (SUBSTITUA as chaves LIVE):
+      
+      STRIPE_SECRET_KEY=sk_live_SUA_CHAVE_SECRETA_AQUI
+      STRIPE_PUBLISHABLE_KEY=pk_live_SUA_CHAVE_PUBLICA_AQUI
+      BASE_URL=https://dressme.tgoo.eu
+   
+   6. Salve (Ctrl+O) e saia (Ctrl+X)
+   
+   7. Configure permissoes:
+      chmod 600 .env
+      chown www-data:www-data .env
+
+B) VIA cPanel/Plesk:
+   
+   1. Acesse Terminal no painel
+   2. Execute: cd api && composer install --no-dev
+   3. Use o File Manager para criar arquivo .env
+   4. Cole o conteudo acima (com chaves LIVE)
+
+================================================================================
+4. OBTER CHAVES DO STRIPE
+================================================================================
+
+1. Acesse: https://dashboard.stripe.com/apikeys
+2. Mude para modo LIVE (toggle no topo)
+3. Copie:
+   - Publishable key: pk_live_...
+   - Secret key: sk_live_... (clique em "Reveal")
+
+ATENCAO: 
+- Use pk_live_ e sk_live_ (NAO pk_test_ ou sk_test_!)
+- NUNCA exponha a SECRET_KEY publicamente
+
+================================================================================
+5. VERIFICAR SE FUNCIONA
+================================================================================
+
+1. Acesse seu site: https://dressme.tgoo.eu
+
+2. Verifique se:
+   ✓ Site carrega sem erros
+   ✓ Console do navegador (F12) sem erros
+   ✓ CSS aplicado corretamente
+   ✓ Imagens carregam
+
+3. Teste o Checkout:
+   - Clique em "Quero o DressMe"
+   - Deve redirecionar para Stripe
+   - Use um cartao de teste ou real
+   - Complete o pagamento
+   - Deve voltar para a pagina de sucesso
+
+4. Verifique logs se houver erro:
+   tail -f /var/log/apache2/error.log
+   (ou caminho do seu servidor)
+
+================================================================================
+6. SEGURANCA (IMPORTANTE!)
+================================================================================
+
+✓ Certifique-se que o site esta em HTTPS (SSL configurado)
+✓ Arquivo .env com permissoes 600 (nao publico)
+✓ Verifique se arquivos .env nao sao acessiveis via navegador
+✓ Mantenha backup das chaves Stripe em local seguro
+
+Para testar se .env esta protegido:
+  Tente acessar: https://dressme.tgoo.eu/api/.env
+  Deve dar erro 403 ou 404 (NAO deve mostrar o conteudo!)
+
+================================================================================
+7. TROUBLESHOOTING
+================================================================================
+
+Erro 500 na API:
+  - Verifique logs do PHP
+  - Confirme que composer install foi executado
+  - Verifique se .env existe e tem as chaves corretas
+
+Site nao carrega:
+  - Verifique permissoes dos arquivos (644 para arquivos, 755 para pastas)
+  - Confirme que extraiu na pasta correta
+  - Verifique configuracao do servidor web
+
+Checkout nao funciona:
+  - Verifique se esta usando chaves LIVE
+  - Confirme que o site esta em HTTPS
+  - Veja console do navegador (F12)
+  - Verifique Stripe Dashboard por erros
+
+================================================================================
+8. CHECKLIST RAPIDO
+================================================================================
+
+Antes de liberar para clientes:
+
+[ ] Arquivos extraidos na pasta publica
+[ ] composer install executado
+[ ] Arquivo .env criado com chaves LIVE
+[ ] Permissoes do .env configuradas (600)
+[ ] Site carrega em HTTPS
+[ ] Checkout testado e funciona
+[ ] Pagamento aparece no Stripe Dashboard
+[ ] Redirecionamento de sucesso/cancelamento funciona
+[ ] Sem erros no console do navegador
+[ ] Logs do servidor sem erros criticos
+
+================================================================================
+9. ESTRUTURA FINAL NO SERVIDOR
+================================================================================
+
+Apos instalacao completa:
+
+public_html/  (ou /var/www/html/)
+├── index.html
+├── assets/
+│   ├── index-4JPe99hI.js
+│   └── index-4JPe99hI.css
+├── public/
+│   ├── success.html
+│   └── cancel.html
+└── api/
+    ├── .env                        ← VOCE CRIA
+    ├── composer.json
+    ├── config.php
+    ├── create-checkout-session.php
+    ├── get-session-status.php
+    └── stripe-php/                 ← composer install cria
+
+================================================================================
+10. SUPORTE
+================================================================================
+
+Documentacao completa no repositorio:
+  https://github.com/officevibecode/landpagedressme
+
+Stripe Dashboard:
+  https://dashboard.stripe.com
+
+Em caso de duvidas:
+  - Verifique logs do servidor
+  - Consulte documentacao do Stripe
+  - Entre em contato com suporte tecnico da hospedagem
+
+================================================================================
+
+BOA SORTE COM O DEPLOY! 🚀
+
+O projeto esta completo e pronto para processar pagamentos reais!
+
+================================================================================
+
