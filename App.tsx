@@ -323,10 +323,12 @@ const Navbar: React.FC<AppProps> = ({ theme, toggleTheme, lang, toggleLang }) =>
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <a 
-              href="#investimento" 
-              className="hidden sm:block bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all shadow-lg shadow-blue-500/20"
+              href="https://wa.me/351938754488" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition-all shadow-lg shadow-green-500/20"
             >
-              {t.cta}
+              <span>WhatsApp</span>
             </a>
           </div>
         </div>
