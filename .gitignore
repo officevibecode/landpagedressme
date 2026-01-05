@@ -42,6 +42,19 @@ api/composer.lock
 *.md
 !README.md
 
+# Arquivos de texto na raiz
+/*.txt
+
+# Scripts de build
+build-producao.bat
+build-producao.sh
+
+# Arquivos de deploy
+*.zip
+dressme-deploy/
+deploy-producao/
+deploy-temp/
+
 # Arquivos de teste
 test-*.php
 *-test.php
